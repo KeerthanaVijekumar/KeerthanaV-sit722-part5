@@ -1,1 +1,75 @@
-# Your Solution
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: books-catalog-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: books-catalog-app
+  template:
+    metadata:
+      labels:
+        app: books-catalog-app
+    spec:
+      containers:
+      - name: bookscatalog-app
+        image: sit722part5.azurecr.io/book-catalog
+        imagePullPolicy: Always
+        env:
+        - name: PORT
+          value: "8000"
+        - name: DATABASE_URL
+          value: postgresql://book_inventory_4j9c_user:TcN8cizZO65r57gQcwqYx2Wt616F1lvK@dpg-crl7ag56l47c73fsut10-a.oregon-postgres.render.com/book_inventory_4j9c
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: books-catalog-service
+spec:
+  selector:
+    app: books-catalog-app
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 80  # The port exposed by the Service
+      targetPort: 8000  # The port the container listens on
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inventory-management-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: inventory-management-app
+  template:
+    metadata:
+      labels:
+        app: inventory-management-app
+    spec:
+      containers:
+      - name: inventorymanagement-app
+        image: sit722part5.azurecr.io/inventory-management
+        imagePullPolicy: Always
+        env:
+        - name: PORT
+          value: "8001"
+        - name: DATABASE_URL
+          value: postgresql://book_inventory_4j9c_user:TcN8cizZO65r57gQcwqYx2Wt616F1lvK@dpg-crl7ag56l47c73fsut10-a.oregon-postgres.render.com/book_inventory_4j9c
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: inventory-management-service
+spec:
+  selector:
+    app: inventory-management-app
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 80  # The port exposed by the Service
+      targetPort: 8001  # The port the container listens on
