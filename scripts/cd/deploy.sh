@@ -3,4 +3,4 @@ set -u
 : "$NAME"
 : "$VERSION"
 
-envsubst < ./scripts/cd/${NAME}.yaml | kubectl apply -f -
+envsubst < ./scripts/kubernetes/${NAME}.yaml | kubectl apply -f -

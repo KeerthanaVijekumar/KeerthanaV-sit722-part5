@@ -1,0 +1,39 @@
+name: "Set Github Secrets"
+
+on:
+  workflow_dispatch:
+
+#Special permissions required for OIDC authentication
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+  actions: write # Allow the workflow to write secrets to the repository
+
+jobs:
+  Github-Actions:
+    name: "Github Actions"
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      # Checkout the repository to the GitHub Actions runner
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: GitHub-Cli login
+        run: |
+          echo "${{ secrets.GH_TOKEN }}" | gh auth login --with-token
+
+      - name: Set Secrets
+        run: |
+          acr_name=$(az acr list | jq -r '.[0].loginServer')
+          gh secret set CONTAINER_REGISTRY --body "$acr_name"
+
+          az acr credential show --name "$acr_name" --query "{username:username, passwords:passwords[0].value}" --output json > credentials.json
+          gh secret set REGISTRY_UN --body "$(cat credentials.json | jq -r '.username')"
+          gh secret set REGISTRY_PW --body "$(cat credentials.json | jq -r '.passwords')"
