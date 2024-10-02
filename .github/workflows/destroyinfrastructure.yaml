@@ -30,7 +30,7 @@ jobs:
     # Destroy the infrastructure
     - name: Terraform Destroy
       working-directory: ./scripts/terraform
-      run: terraform destroy -auto-approve -var "app_name=sit722part5"
+      run: terraform destroy -auto-approve
 
     # Refresh Terraform state
     - name: Refresh terraform
