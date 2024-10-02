@@ -13,9 +13,7 @@ on:
     types:
       - completed
 
-  #
   # Allows deployment to be invoked manually through the GitHub Actions user interface.
-  #
   workflow_dispatch: 
 
 jobs:
@@ -27,7 +25,7 @@ jobs:
       VERSION: ${{ github.sha }}
       CONTAINER_REGISTRY: ${{ secrets.CONTAINER_REGISTRY }}
       REGISTRY_UN: ${{ secrets.REGISTRY_UN }}
-      REGISTRY_PW: ${{ secrets.REGISTRY_PW  }}
+      REGISTRY_PW: ${{ secrets.REGISTRY_PW }}
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       NAME: inventory_management
       DIRECTORY: inventory_management
@@ -39,6 +37,7 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE.
       - uses: actions/checkout@v3
 
+      # Login to Azure
       - uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
@@ -52,29 +51,51 @@ jobs:
 
       # Get AKS configs
       - name: Connect to Kubernetes
-        run: az aks get-credentials --resource-group sit722part5 --name sit722part5 --overwrite-existing
+        run: az aks get-credentials --resource-group sit722part5 --name sit722part5 --overwrite-existing 
 
-      #
-      # Builds the Docker image.
-      #
-      - name: Build
+      # Login to Docker
+      - name: Log in to Docker
+        run: echo "${{ secrets.REGISTRY_PW }}" | docker login ${{ secrets.CONTAINER_REGISTRY }} -u ${{ secrets.REGISTRY_UN }} --password-stdin
+
+      # Check if Docker image already exists
+      - name: Check if Docker image already exists
+        id: check_image
+        run: |
+          if docker manifest inspect ${{ secrets.CONTAINER_REGISTRY }}/${{ env.NAME }}:${{ env.VERSION }} > /dev/null 2>&1; then
+            echo "Image already exists"
+            echo "::set-output name=image_exists::true"
+          else
+            echo "Image does not exist"
+            echo "::set-output name=image_exists::false"
+          fi
+
+      # Grant execute permission to the build script
+      - name: Grant execute permission for the build script
+        run: chmod +x ./scripts/cd/build-image.sh
+        
+      # Conditionally build the Docker image only if it doesn't exist
+      - name: Build the Docker image
+        if: steps.check_image.outputs.image_exists == 'false'
         run: ./scripts/cd/build-image.sh
 
-      #
-      # Push the Docker image to the container registry.
-      #
-      - name: Publish
+      # Grant execute permission for the push script
+      - name: Grant execute permission for the push script
+        run: chmod +x ./scripts/cd/push-image.sh
+
+      # Conditionally push the Docker image only if it doesn't exist
+      - name: Publish the Docker image to the container registry
+        if: steps.check_image.outputs.image_exists == 'false'
         run: ./scripts/cd/push-image.sh
+
+      # Grant execute permission for the deploy script
+      - name: Grant execute permission for the deploy script
+        run: chmod +x ./scripts/cd/deploy.sh
       
-      #
-      # Expands the configuration template and deploys the microservice.
-      #
-      - name: Deploy
+      # Deploy the application to Kubernetes
+      - name: Deploy the application to Kubernetes
         run: ./scripts/cd/deploy.sh
 
-      #
-      # Verify Deployment.
-      #
+      # Verify Deployment
       - name: Verify Kubernetes Deployment
         run: |
           echo "** kubectl get deployment **"
