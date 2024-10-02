@@ -21,27 +21,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Debug the AZURE_CREDENTIALS secret (without sensitive data)
-      - name: Debug AZURE_CREDENTIALS
-        run: |
-          echo "${{ secrets.AZURE_CREDENTIALS }}" | jq  # Prints the JSON structure
-
-      # Parse Azure Credentials (JSON stored in AZURE_CREDENTIALS secret)
-      - name: Parse Azure Credentials
-        run: |
-          echo "${{ secrets.AZURE_CREDENTIALS }}" | jq -r '.clientId' > CLIENT_ID.txt
-          echo "${{ secrets.AZURE_CREDENTIALS }}" | jq -r '.clientSecret' > CLIENT_SECRET.txt
-          echo "${{ secrets.AZURE_CREDENTIALS }}" | jq -r '.subscriptionId' > SUBSCRIPTION_ID.txt
-          echo "${{ secrets.AZURE_CREDENTIALS }}" | jq -r '.tenantId' > TENANT_ID.txt
-
-      # Set environment variables
-      - name: Set Environment Variables
-        run: |
-          export ARM_CLIENT_ID=$(cat CLIENT_ID.txt)
-          export ARM_CLIENT_SECRET=$(cat CLIENT_SECRET.txt)
-          export ARM_SUBSCRIPTION_ID=$(cat SUBSCRIPTION_ID.txt)
-          export ARM_TENANT_ID=$(cat TENANT_ID.txt)
-        shell: bash
+      # Login to Azure using the AZURE_CREDENTIALS secret (JSON format)
+      - uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       # Install the latest version of Terraform CLI
       - name: Setup Terraform
