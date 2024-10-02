@@ -21,6 +21,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Debug the AZURE_CREDENTIALS secret (without sensitive data)
+      - name: Debug AZURE_CREDENTIALS
+        run: |
+          echo "${{ secrets.AZURE_CREDENTIALS }}" | jq  # Prints the JSON structure
+
       # Parse Azure Credentials (JSON stored in AZURE_CREDENTIALS secret)
       - name: Parse Azure Credentials
         run: |

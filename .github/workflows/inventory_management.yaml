@@ -32,6 +32,8 @@ jobs:
       NAME: inventory_management
       DIRECTORY: inventory_management
 
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}  # Only run if previous workflow succeeded
+
     steps:
       
       # Checks-out your repository under $GITHUB_WORKSPACE.
