@@ -1,24 +1,30 @@
-# Creates a managed Kubernetes cluster on Azure.
-resource "azurerm_kubernetes_cluster" "cluster" {
-    name                = var.app_name
-    location            = var.location
-    resource_group_name = azurerm_resource_group.sit722part5.name
-    dns_prefix          = var.app_name
-    kubernetes_version  = var.kubernetes_version
-
-    default_node_pool {
-        name            = "default"
-        node_count      = 1
-        vm_size         = "Standard_B2s"
-    }
-
-    identity {
-        type = "SystemAssigned"
-    }    
+# Check if the Kubernetes cluster exists
+data "azurerm_kubernetes_cluster" "existing_cluster" {
+  name                = var.app_name
+  resource_group_name = azurerm_resource_group.sit722part5.name
 }
 
-# Attaches the container registry to the cluster.
+# Create the Kubernetes cluster only if it does not exist
+resource "azurerm_kubernetes_cluster" "cluster" {
+  count               = length(data.azurerm_kubernetes_cluster.existing_cluster.id) == 0 ? 1 : 0
+  name                = var.app_name
+  location            = var.location
+  resource_group_name = azurerm_resource_group.sit722part5.name
+  dns_prefix          = var.app_name
+  kubernetes_version  = var.kubernetes_version
 
+  default_node_pool {
+    name            = "default"
+    node_count      = 1
+    vm_size         = "Standard_B2s"
+  }
+
+  identity {
+    type = "SystemAssigned"
+  }
+}
+
+# Attaches the container registry to the cluster
 resource "azurerm_role_assignment" "role_assignment" {
   principal_id                     = azurerm_kubernetes_cluster.cluster.kubelet_identity[0].object_id
   role_definition_name             = "AcrPull"
