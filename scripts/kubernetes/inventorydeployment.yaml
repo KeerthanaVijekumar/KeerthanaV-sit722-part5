@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inventory-management-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: inventory-management-app
+  template:
+    metadata:
+      labels:
+        app: inventory-management-app
+    spec:
+      containers:
+      - name: inventorymanagement-app
+        image: $CONTAINER_REGISTRY/$NAME:$VERSION
+        imagePullPolicy: Always
+        env:
+        - name: PORT
+          value: "8001"
+        - name: DATABASE_URL
+          value: $DATABASE_URL
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: inventory-management-service
+spec:
+  selector:
+    app: inventory-management-app
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 80  # The port exposed by the Service
+      targetPort: 8001  # The port the container listens on

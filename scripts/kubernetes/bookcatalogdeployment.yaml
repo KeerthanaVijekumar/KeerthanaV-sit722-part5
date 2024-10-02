@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: books-catalog-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: books-catalog-app
+  template:
+    metadata:
+      labels:
+        app: books-catalog-app
+    spec:
+      containers:
+      - name: bookscatalog-app
+        image: $CONTAINER_REGISTRY/$NAME:$VERSION
+        imagePullPolicy: Always
+        env:
+        - name: PORT
+          value: "8000"
+        - name: DATABASE_URL
+          value: $DATABASE_URL
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: books-catalog-service
+spec:
+  selector:
+    app: books-catalog-app
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 80  # The port exposed by the Service
+      targetPort: 8000  # The port the container listens on
