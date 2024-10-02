@@ -36,6 +36,11 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
+      #Format and validate Terraform files before applying
+      - name: Terraform Format
+        working-directory: scripts/terraform
+        run: terraform fmt -check -recursive
+
       # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
       - name: Terraform Init
         working-directory: scripts/terraform

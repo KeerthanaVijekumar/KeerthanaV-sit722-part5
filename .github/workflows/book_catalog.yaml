@@ -63,13 +63,13 @@ jobs:
         run: ./scripts/cd/build-image.sh
 
       #
-      # Publishes the Docker image to the container registry.
+      # Push the Docker image to the container registry.
       #
       - name: Publish
         run: ./scripts/cd/push-image.sh
       
       #
-      # Expands the configuration template and deploys the microservice.
+      # Deploy to Kubernetes
       #
       - name: Deploy
         run: ./scripts/cd/deploy.sh

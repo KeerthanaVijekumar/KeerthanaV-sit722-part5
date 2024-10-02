@@ -22,10 +22,17 @@ jobs:
       working-directory: ./scripts/terraform
       run: terraform init
 
+    # Terraform validate before destroy
+    - name: Terraform Validate
+      working-directory: ./scripts/terraform
+      run: terraform validate
+
+    # Destroy the infrastructure
     - name: Terraform Destroy
       working-directory: ./scripts/terraform
       run: terraform destroy -auto-approve -var "resource_group_name=booksApp"
 
+    # Refresh Terraform state
     - name: Refresh terraform
       working-directory: ./scripts/terraform  
       run: terraform refresh
