@@ -5,7 +5,7 @@
 # For real use you might want to restrict this to the "prod" branch.
 #
 
-name: Deploy inventory_management
+name: Deploy inventory_management App
 
 on:
   #

@@ -1,4 +1,4 @@
-name: "Set Github Secrets"
+name: Set Github Secrets
 
 on:
   workflow_dispatch:

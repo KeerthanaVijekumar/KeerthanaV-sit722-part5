@@ -5,7 +5,7 @@
 # For real use you might want to restrict this to the "prod" branch.
 #
 
-name: Deploy book_catalog
+name: Deploy book_catalog App
 
 on:
   #
