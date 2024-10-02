@@ -5,17 +5,13 @@
 # For real use you might want to restrict this to the "prod" branch.
 #
 
-name: Deploy inventory_management App
+name: "Deploy inventory_management App"
 
 on:
-  #
-  # Deploys the microservice on push to the specified subdirectory in the main branch of this code repository.
-  #
-  push: 
-    branches:
-      - main
-    paths:
-      - inventory_management/**
+  workflow_run:
+    workflows: ["Deploy book_catalog App"]  # Trigger after the book catalog app is deployed
+    types:
+      - completed
 
   #
   # Allows deployment to be invoked manually through the GitHub Actions user interface.
@@ -54,7 +50,7 @@ jobs:
 
       # Get AKS configs
       - name: Connect to Kubernetes
-        run: az aks get-credentials --resource-group booksApp --name booksApp --overwrite-existing
+        run: az aks get-credentials --resource-group sit722part5 --name sit722part5 --overwrite-existing
 
       #
       # Builds the Docker image.
@@ -63,7 +59,7 @@ jobs:
         run: ./scripts/cd/build-image.sh
 
       #
-      # Publishes the Docker image to the container registry.
+      # Push the Docker image to the container registry.
       #
       - name: Publish
         run: ./scripts/cd/push-image.sh

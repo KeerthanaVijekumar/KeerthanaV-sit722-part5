@@ -1,7 +1,7 @@
 name: Infrastrcture Terraform Destroy
 
 on:
-  workflow_dispatch:  
+  workflow_dispatch:  # Trigger manually when needed
 
 jobs:
   terraform-destroy:
@@ -30,7 +30,7 @@ jobs:
     # Destroy the infrastructure
     - name: Terraform Destroy
       working-directory: ./scripts/terraform
-      run: terraform destroy -auto-approve -var "resource_group_name=booksApp"
+      run: terraform destroy -auto-approve -var "resource_group_name=sit722part5"
 
     # Refresh Terraform state
     - name: Refresh terraform
