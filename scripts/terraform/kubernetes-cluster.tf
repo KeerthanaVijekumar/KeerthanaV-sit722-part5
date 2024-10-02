@@ -26,9 +26,12 @@ resource "azurerm_kubernetes_cluster" "cluster" {
 
 # Attaches the container registry to the cluster
 resource "azurerm_role_assignment" "role_assignment" {
-  principal_id                     = azurerm_kubernetes_cluster.cluster[0].kubelet_identity[0].object_id
-  role_definition_name             = "AcrPull"
-  scope                            = azurerm_container_registry.container_registry[0].id
+  count               = length(azurerm_kubernetes_cluster.cluster) > 0 && length(azurerm_container_registry.container_registry) > 0 ? 1 : 0
+
+  principal_id        = azurerm_kubernetes_cluster.cluster[0].kubelet_identity[0].object_id
+  role_definition_name = "AcrPull"
+  scope               = azurerm_container_registry.container_registry[0].id
   skip_service_principal_aad_check = true
 }
+
 
